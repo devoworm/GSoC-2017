@@ -27,17 +27,18 @@ gI = mh.gborders(img, alpha=1000, sigma=5.48)
 cv2.imshow("gI",gI)
 #cv2.waitKey(0)
 
-mgac = mh.MorphGAC(gI, smoothing=1, threshold=0.01, balloon=-1)
+mgac = mh.MorphGAC(gI, smoothing=1, threshold=0.31, balloon=-1)
 #mgac = mh.MorphACWE(img, smoothing=1, lambda1=1, lambda2=3)
 
 for cnt in [12, 13, 14, 15, 16, 17, 18]:
     mask = np.zeros(img.shape, np.uint8)
     cv2.drawContours(mask, contours, cnt, (255), -1)
     mask[mask > 0] = 1
+    mask = cv2.dilate(mask, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (11, 11)), iterations=1)
     mgac.levelset = mask
     cv2.imshow("levelset",mgac.levelset)
-    #cv2.waitKey(0)
+    cv2.waitKey(0)
     ppl.figure()
-    mh.evolve_visual(mgac, num_iters=1000, background=img)
+    mh.evolve_visual(mgac, num_iters=300, background=img)
     print("done")
     ppl.show()
