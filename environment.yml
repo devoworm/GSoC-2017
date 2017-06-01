@@ -1,0 +1,10 @@
+dependencies:
+ - python=3.5
+ - numpy
+ - scipy
+ - scikit-learn
+ - jupyter
+ - requests
+ - opencv=3.2.0
+ - scikit-image
+ - glob

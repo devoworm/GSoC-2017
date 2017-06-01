@@ -1,0 +1,6 @@
+[submodule "src/python/thirdparty/chanvese"]
+	path = src/python/thirdparty/chanvese
+	url = https://github.com/kevin-keraudren/chanvese
+[submodule "src/python/thirdparty/morphsnakes"]
+	path = src/python/thirdparty/morphsnakes
+	url = https://github.com/pmneila/morphsnakes
