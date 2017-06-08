@@ -19,4 +19,4 @@ cv2.drawContours(mask, contours, 12, (255), -1)
 cv2.imshow("final",mask)
 mask[mask>0] = 1
 cv2.waitKey(0)
-chanvese(img, mask, max_its=200, display=True, alpha=0.6)
+chanvese(img, mask, max_its=1000, display=True, alpha=0.1)

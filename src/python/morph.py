@@ -34,11 +34,11 @@ for cnt in [12, 13, 14, 15, 16, 17, 18]:
     mask = np.zeros(img.shape, np.uint8)
     cv2.drawContours(mask, contours, cnt, (255), -1)
     mask[mask > 0] = 1
-    mask = cv2.dilate(mask, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (11, 11)), iterations=1)
+    mask = cv2.dilate(mask, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (41, 41)), iterations=2)
     mgac.levelset = mask
     cv2.imshow("levelset",mgac.levelset)
     cv2.waitKey(0)
     ppl.figure()
-    mh.evolve_visual(mgac, num_iters=300, background=img)
+    mh.evolve_visual(mgac, num_iters=400, background=img)
     print("done")
     ppl.show()
