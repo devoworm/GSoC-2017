@@ -37,7 +37,7 @@ public class PlugInForLevelSet implements PlugInFilter {
         ImagePlus finalAnswer = new ImagePlus();
 
         ImagePlus cellMask = getWholeCellMask(imagePlusOrignal);
-        cellMask.show();// debug
+        cellMask.show();
 
         //stores the classifies Image
         ImagePlus imagePlus = getClassifiedImage(imagePlusOrignal);
@@ -49,9 +49,6 @@ public class PlugInForLevelSet implements PlugInFilter {
         imagePlus = refineMask(imagePlus, cellMask);
         imagePlus = morph(imagePlus);
 
-        imagePlus.show();//debug
-
-
         //Declare ROI Manager for Particle Analyzer
         RoiManager rm = new RoiManager();
         ParticleAnalyzer.setRoiManager(rm);
@@ -61,12 +58,20 @@ public class PlugInForLevelSet implements PlugInFilter {
         pa.analyze(imagePlus);
 
         boolean firstTime = true;
-        for (int i = 0; i < rm.getCount(); i++) {
+        int lim=rm.getCount();
+        Roi finalRoi[] = new Roi[lim];
+        for (int i = 0; i < lim ; i++) {
 
             rm.select(i);
-            copy.setRoi(rm.getRoi(i));
+            Roi roi = rm.getRoi(i);
+            copy.setRoi(roi);
 
             ImagePlus seg = getSegmentedImage(copy);
+            IJ.run(seg,"Invert","");
+            seg = refineMask2(seg,cellMask);
+            IJ.run(seg,"Invert","");
+            IJ.run(seg, "Create Selection", "");
+            finalRoi[i] = seg.getRoi();
 
             if (firstTime) {
                 firstTime = false;
@@ -79,6 +84,14 @@ public class PlugInForLevelSet implements PlugInFilter {
 
         finalAnswer.show();
 
+        rm.deselect();
+        rm.close();
+
+        rm = new RoiManager();
+        for (int j = 0; j < lim; j++) {
+            rm.addRoi(finalRoi[j]);
+        }
+
         //TODO: Run a Level set algo to find edge of the whole embryo. Then use it after thresholding[To remove stuff outside the embryo] and after getting results[To prevent overshooting of levetset]
     }
 
@@ -88,9 +101,19 @@ public class PlugInForLevelSet implements PlugInFilter {
         IJ.run(restrictions, "Dilate", "");
         IJ.run(restrictions, "Dilate", "");
         IJ.run(restrictions, "Dilate", "");
+        IJ.run(restrictions, "Dilate", "");
+        IJ.run(restrictions, "Dilate", "");
+        IJ.run(restrictions, "Dilate", "");
         ImageCalculator imageCalculator = new ImageCalculator();
         return imageCalculator.run("and create", imagePlus, restrictions);
     }
+    private ImagePlus refineMask2(ImagePlus imagePlus, ImagePlus restrictions)
+    {
+       
+        ImageCalculator imageCalculator = new ImageCalculator();
+        return imageCalculator.run("and create", imagePlus, restrictions);
+    }
+
     private ImagePlus getWholeCellMask(ImagePlus imagePlus) {
 
         //TODO: Automate this
@@ -102,7 +125,7 @@ public class PlugInForLevelSet implements PlugInFilter {
         //Trainable Weka Segmentation
         WekaSegmentation wekaSegmentator = new WekaSegmentation(imagePlus);
         //Classifier Model file Loaded. TODO: Decide the path
-        wekaSegmentator.loadClassifier("F:\\FijiDev\\TryGlobal\\src\\classifier.model");
+        wekaSegmentator.loadClassifier("F:\\FijiDev\\TryGlobal\\src\\fast.model");
         //true means probability map will be given
         wekaSegmentator.applyClassifier(true);
         ImagePlus classifiedImage = wekaSegmentator.getClassifiedImage();
@@ -110,7 +133,7 @@ public class PlugInForLevelSet implements PlugInFilter {
 
 
         //TODO: Figure out a better way to do the below. This DIRTY CODE
-        IJ.run(classifiedImage, "Next Slice [>]", "");
+        //IJ.run(classifiedImage, "Next Slice [>]", "");
         IJ.run(classifiedImage, "Delete Slice", "");
 
         IJ.saveAsTiff(classifiedImage, "ProbMap");
@@ -171,7 +194,7 @@ public class PlugInForLevelSet implements PlugInFilter {
         double curvature = 1.0;
         double grey_tol = 1.0;
         boolean expandToInside = false;
-        int max_iteration = 15;
+        int max_iteration = 25;
         int step_iteration = 100;
 
         return getSegImage(originalImage, roi, convergence, advection, curvature, grey_tol, expandToInside, max_iteration, step_iteration);
