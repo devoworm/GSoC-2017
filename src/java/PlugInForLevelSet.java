@@ -36,6 +36,9 @@ public class PlugInForLevelSet implements PlugInFilter {
 
         ImagePlus finalAnswer = new ImagePlus();
 
+        ImagePlus cellMask = getWholeCellMask(imagePlusOrignal);
+        cellMask.show();// debug
+
         //stores the classifies Image
         ImagePlus imagePlus = getClassifiedImage(imagePlusOrignal);
         IJ.log("Image Classified");
@@ -43,6 +46,10 @@ public class PlugInForLevelSet implements PlugInFilter {
 
         imagePlus = smooth(imagePlus);
         imagePlus = threshold(imagePlus);
+        imagePlus = refineMask(imagePlus, cellMask);
+        imagePlus = morph(imagePlus);
+
+        imagePlus.show();//debug
 
 
         //Declare ROI Manager for Particle Analyzer
@@ -67,19 +74,35 @@ public class PlugInForLevelSet implements PlugInFilter {
             } else {
                 ImageCalculator imageCalculator = new ImageCalculator();
                 finalAnswer = imageCalculator.run("min create", finalAnswer, seg);
-
             }
         }
+
         finalAnswer.show();
 
         //TODO: Run a Level set algo to find edge of the whole embryo. Then use it after thresholding[To remove stuff outside the embryo] and after getting results[To prevent overshooting of levetset]
     }
 
-    protected ImagePlus getClassifiedImage(ImagePlus imagePlus) {
+    private ImagePlus refineMask(ImagePlus imagePlus, ImagePlus restrictions)
+    {
+        IJ.run(restrictions, "Dilate", "");
+        IJ.run(restrictions, "Dilate", "");
+        IJ.run(restrictions, "Dilate", "");
+        IJ.run(restrictions, "Dilate", "");
+        ImageCalculator imageCalculator = new ImageCalculator();
+        return imageCalculator.run("and create", imagePlus, restrictions);
+    }
+    private ImagePlus getWholeCellMask(ImagePlus imagePlus) {
+
+        //TODO: Automate this
+        Roi roi = new Roi(10, 10, 360, 603);
+        return getSegImage(imagePlus,roi,0.0030,1.0,1.0,1,true,50,100);
+    }
+
+    private ImagePlus getClassifiedImage(ImagePlus imagePlus) {
         //Trainable Weka Segmentation
         WekaSegmentation wekaSegmentator = new WekaSegmentation(imagePlus);
         //Classifier Model file Loaded. TODO: Decide the path
-        wekaSegmentator.loadClassifier("F:\\FijiDev\\TryGlobal\\src\\fast.model");
+        wekaSegmentator.loadClassifier("F:\\FijiDev\\TryGlobal\\src\\classifier.model");
         //true means probability map will be given
         wekaSegmentator.applyClassifier(true);
         ImagePlus classifiedImage = wekaSegmentator.getClassifiedImage();
@@ -87,7 +110,7 @@ public class PlugInForLevelSet implements PlugInFilter {
 
 
         //TODO: Figure out a better way to do the below. This DIRTY CODE
-        //IJ.run(classifiedImage, "Next Slice [>]", "");
+        IJ.run(classifiedImage, "Next Slice [>]", "");
         IJ.run(classifiedImage, "Delete Slice", "");
 
         IJ.saveAsTiff(classifiedImage, "ProbMap");
@@ -131,19 +154,31 @@ public class PlugInForLevelSet implements PlugInFilter {
         int opts = ParticleAnalyzer.ADD_TO_MANAGER;
         int meas = Measurements.ALL_STATS;
         double minSize = Math.PI * Math.pow((10.0 / 2), 2.0);
-        double maxSize = Math.PI * Math.pow((150.0 / 2), 2.0);
-        ResultsTable rt1 = new ResultsTable();
+        double maxSize = Math.PI * Math.pow((300.0 / 2), 2.0);
 
-        ParticleAnalyzer pa = new ParticleAnalyzer(opts, meas, rt1, minSize, maxSize);
-        return pa;
+        return new ParticleAnalyzer(opts, meas, new ResultsTable(), minSize, maxSize);
     }
 
     //originalImage must have an roi selected in it
     private ImagePlus getSegmentedImage(ImagePlus originalImage) {
 
-
-        //roi for LS
+//      roi for LS
         Roi roi = originalImage.getRoi();
+
+        // parameters
+        double convergence = 0.0050;
+        double advection = 1.0;
+        double curvature = 1.0;
+        double grey_tol = 1.0;
+        boolean expandToInside = false;
+        int max_iteration = 15;
+        int step_iteration = 100;
+
+        return getSegImage(originalImage, roi, convergence, advection, curvature, grey_tol, expandToInside, max_iteration, step_iteration);
+    }
+
+    private ImagePlus getSegImage(ImagePlus originalImage, Roi roi, double convergence, double advection, double curvature, double grey_tol, boolean expandToInside, int max_iteration, int step_iteration) {
+        originalImage.setRoi(roi);
 
         //creating ImageContainer
         ImageContainer ic = new ImageContainer(originalImage);
@@ -161,20 +196,14 @@ public class PlugInForLevelSet implements PlugInFilter {
 
         // Create a initial state map out of the roi
         StateContainer sc_roi = new StateContainer();
-        System.out.println("current slice: " + originalImage.getCurrentSlice());
         sc_roi.setROI(roi, ic.getWidth(), ic.getHeight(), ic.getImageCount(), originalImage.getCurrentSlice());
 
-        //For which side to evolve
-        sc_roi.setExpansionToInside(false);
-
-        double convergence = 0.0050;
-        double advection = 1.0;
-        double curvature = 1.0;
-        double grey_tol = 1.0;
-
+        //For which side to evolve. False implies that it will expand to Outside.
+        sc_roi.setExpansionToInside(expandToInside);
         LevelSetImplementation ls = new ActiveContours(ic, progressImage, sc_roi, convergence, advection, curvature, grey_tol);
-        for (int iter = 0; iter < 25; iter++) {
-            if (!ls.step(100)) {
+
+        for (int iter = 0; iter < max_iteration; iter++) {
+            if (!ls.step(step_iteration)) {
                 break;
             }
         }

@@ -12,7 +12,8 @@ def circle_levelset(shape, center, sqradius, scalerow=1.0):
     u = np.float_(phi > 0)
     return u
 
-img = cv2.imread('../data/interim/spim2/c97.jpg',0)
+
+img = cv2.imread('../data/interim/spim2/c397.jpg', 0)
 
 filtered = cv2.bilateralFilter(img, 9,350,350)
 edgeShape = edge.edge(filtered)
@@ -25,10 +26,10 @@ _ , contours, _ = cv2.findContours(final, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE
 
 gI = mh.gborders(img, alpha=1000, sigma=5.48)
 cv2.imshow("gI",gI)
-#cv2.waitKey(0)
+cv2.waitKey(0)
 
-mgac = mh.MorphGAC(gI, smoothing=1, threshold=0.31, balloon=-1)
-#mgac = mh.MorphACWE(img, smoothing=1, lambda1=1, lambda2=3)
+# mgac = mh.MorphGAC(gI, smoothing=1, threshold=0.31, balloon=-1)
+mgac = mh.MorphACWE(filtered, smoothing=1, lambda1=1, lambda2=3)
 
 for cnt in [12, 13, 14, 15, 16, 17, 18]:
     mask = np.zeros(img.shape, np.uint8)

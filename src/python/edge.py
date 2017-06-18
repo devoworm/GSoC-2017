@@ -9,16 +9,16 @@ accepts a greyscale image
 # hedge increases the wiegit
 def edge(img, hedge=1, vedge=1):
     # make a matrix of column matrix of (1,1). This matrix is applied as a kernel on the matrix of the photo
-    kernelVertical = np.matrix('1  ; -1')
+    kernelVertical = np.matrix('1  ;-1')
     # the kernel being applied on the image matrix. img-image on which kernel is to be applied
     verticalEdge = cv2.filter2D(img, -1, kernelVertical)
-    kernelVertical1 = np.matrix('-1   ; 1')
+    kernelVertical1 = np.matrix('1  ; -1')
     verticalEdge1 = cv2.filter2D(img, -1, kernelVertical1)
     verticalEdgeFinal = cv2.add(verticalEdge, verticalEdge1);
 
-    kernelHorizontal = np.matrix("1   -1")
+    kernelHorizontal = np.matrix("1  -1")
     horizontalEdge = cv2.filter2D(img, -1, kernelHorizontal)
-    kernelHorizontal1 = np.matrix("-1  1")
+    kernelHorizontal1 = np.matrix("-1 1")
     horizontalEdge1 = cv2.filter2D(img, -1, kernelHorizontal1)
     horizontalEdgeFinal = cv2.add(horizontalEdge, horizontalEdge1)
     dst = (cv2.add((horizontalEdgeFinal) ^ hedge, (verticalEdgeFinal) * vedge))
