@@ -19,6 +19,13 @@ import trainableSegmentation.WekaSegmentation;
 
 public class PlugInForLevelSet implements PlugInFilter {
 
+    String classiferFileAddress = "F:\\FijiDev\\TryGlobal\\src\\fast.model";
+    boolean isDataFine = false;
+
+    //automate
+    double lowerThreshold = 175.0;
+    double upperThreshold = 255.0;
+
     @Override
     public int setup(String s, ImagePlus imagePlus) {
 
@@ -34,72 +41,54 @@ public class PlugInForLevelSet implements PlugInFilter {
         //copy is a duplicate of the original image. It is used in later part of the program to refine edges using LevelSet
         ImagePlus copy = new Duplicator().run(imagePlusOrignal);
 
-        ImagePlus finalAnswer = new ImagePlus();
-
+        //this the outer boundary of the embryo. Used to neglect/remove regions we get outside the embryo
         ImagePlus cellMask = getWholeCellMask(imagePlusOrignal);
-        cellMask.show();
 
         //stores the classifies Image
         ImagePlus imagePlus = getClassifiedImage(imagePlusOrignal);
         IJ.log("Image Classified");
-
 
         imagePlus = smooth(imagePlus);
         imagePlus = threshold(imagePlus);
         imagePlus = refineMask(imagePlus, cellMask);
         imagePlus = morph(imagePlus);
 
+
         //Declare ROI Manager for Particle Analyzer
         RoiManager rm = new RoiManager();
         ParticleAnalyzer.setRoiManager(rm);
 
-
+        //ParticleAnalyzer obtained
         ParticleAnalyzer pa = getParticleAnalyzer();
         pa.analyze(imagePlus);
 
-        boolean firstTime = true;
-        int lim=rm.getCount();
-        Roi finalRoi[] = new Roi[lim];
-        for (int i = 0; i < lim ; i++) {
+        int numberOfRoi = rm.getCount();
+        Roi finalRoi[] = new Roi[numberOfRoi];
+        for (int i = 0; i < numberOfRoi; i++) {
 
             rm.select(i);
             Roi roi = rm.getRoi(i);
             copy.setRoi(roi);
 
             ImagePlus seg = getSegmentedImage(copy);
-            IJ.run(seg,"Invert","");
-            seg = refineMask2(seg,cellMask);
-            IJ.run(seg,"Invert","");
             IJ.run(seg, "Create Selection", "");
             finalRoi[i] = seg.getRoi();
 
-            if (firstTime) {
-                firstTime = false;
-                finalAnswer = new Duplicator().run(seg);
-            } else {
-                ImageCalculator imageCalculator = new ImageCalculator();
-                finalAnswer = imageCalculator.run("min create", finalAnswer, seg);
-            }
         }
 
-        finalAnswer.show();
-
+        // deletes the previous ROIs.
         rm.deselect();
         rm.close();
 
+        // new ROI Manager for displaying the finalRoi. Implies contours after using LevelSets
         rm = new RoiManager();
-        for (int j = 0; j < lim; j++) {
+        for (int j = 0; j < numberOfRoi; j++) {
             rm.addRoi(finalRoi[j]);
         }
 
-        //TODO: Run a Level set algo to find edge of the whole embryo. Then use it after thresholding[To remove stuff outside the embryo] and after getting results[To prevent overshooting of levetset]
-    }
+    }//run ends
 
-    private ImagePlus refineMask(ImagePlus imagePlus, ImagePlus restrictions)
-    {
-        IJ.run(restrictions, "Dilate", "");
-        IJ.run(restrictions, "Dilate", "");
-        IJ.run(restrictions, "Dilate", "");
+    private ImagePlus refineMask(ImagePlus imagePlus, ImagePlus restrictions) {
         IJ.run(restrictions, "Dilate", "");
         IJ.run(restrictions, "Dilate", "");
         IJ.run(restrictions, "Dilate", "");
@@ -107,37 +96,48 @@ public class PlugInForLevelSet implements PlugInFilter {
         ImageCalculator imageCalculator = new ImageCalculator();
         return imageCalculator.run("and create", imagePlus, restrictions);
     }
-    private ImagePlus refineMask2(ImagePlus imagePlus, ImagePlus restrictions)
-    {
-       
-        ImageCalculator imageCalculator = new ImageCalculator();
-        return imageCalculator.run("and create", imagePlus, restrictions);
-    }
 
+    /**
+     * @param imagePlus the ImagePlus object of the very original input image.
+     *                  For excellent performance ensure that region around the embryo has almost no whitish features.
+     * @return A binary image where white represents the embryonic region
+     */
     private ImagePlus getWholeCellMask(ImagePlus imagePlus) {
 
-        //TODO: Automate this
-        Roi roi = new Roi(10, 10, 360, 603);
-        return getSegImage(imagePlus,roi,0.0030,1.0,1.0,1,true,50,100);
+        //TODO: Automate the creation of initial contour in getWholeCellMask or put restrictions on data received.
+        if(isDataFine) {
+            Roi roi = new Roi(1, 1, imagePlus.getWidth()-3, imagePlus.getHeight()-3);
+            return getSegImage(imagePlus, roi, 0.0030, 1.0, 1.0, 1, true, 50, 100);
+        }
+        else
+        {
+            /*
+                CHANGE THIS if data is not up to the mark.
+                Set ROI such that whitish features, which doesn't represents embryonic features, is not present in the ROI.
+             */
+            Roi roi = new Roi(10, 10, 360, 603);
+            return getSegImage(imagePlus, roi, 0.0030, 1.0, 1.0, 1, true, 50, 100);
+        }
     }
 
     private ImagePlus getClassifiedImage(ImagePlus imagePlus) {
+
         //Trainable Weka Segmentation
         WekaSegmentation wekaSegmentator = new WekaSegmentation(imagePlus);
         //Classifier Model file Loaded. TODO: Decide the path
-        wekaSegmentator.loadClassifier("F:\\FijiDev\\TryGlobal\\src\\fast.model");
+        wekaSegmentator.loadClassifier(classiferFileAddress);
         //true means probability map will be given
         wekaSegmentator.applyClassifier(true);
         ImagePlus classifiedImage = wekaSegmentator.getClassifiedImage();
         classifiedImage.show();
 
-
-        //TODO: Figure out a better way to do the below. This DIRTY CODE
+        //TODO: Figure out a better way to do the below. This DIRTY CODE. Deal with Slices.
         //IJ.run(classifiedImage, "Next Slice [>]", "");
         IJ.run(classifiedImage, "Delete Slice", "");
 
         IJ.saveAsTiff(classifiedImage, "ProbMap");
         IJ.run(classifiedImage, "8-bit", "");
+
         return classifiedImage;
     }
 
@@ -150,9 +150,22 @@ public class PlugInForLevelSet implements PlugInFilter {
         return imagePlus;
     }
 
+    /**
+     * This function is meant to threshold the probability map.
+     * We chose a lower limit such that we get significant portion of inner cell
+     * @param imagePlus We expect a smoothed image of the probability map
+     * @return A binary mask such that black color represents the interior of the cell
+     *          This output will require post processing.
+     *          Problems: The following regions can be black:
+     *              - region outside the embryo -> To be solved used Cell Mask
+     *              - small portions of cell membrane -> partly solved by morph functions
+     *              - TODO: multiple region in single cell(gives multiple overlapping final result)
+     *              - multiple granular region due to noise -> part solved using morph functions
+     */
     private ImagePlus threshold(ImagePlus imagePlus) {
-        //Thresholding TODO: Automatically decide the lower limit
-        IJ.setThreshold(imagePlus, 175.0, 255.0, "Black & White"); //We chose a lower limit such that we get significant portion of inner cell
+
+        // TODO: Automatically decide the lower limit
+        IJ.setThreshold(imagePlus, lowerThreshold, upperThreshold, "Black & White");
         IJ.run(imagePlus, "Convert to Mask", "");
         return imagePlus;
     }
@@ -185,7 +198,7 @@ public class PlugInForLevelSet implements PlugInFilter {
     //originalImage must have an roi selected in it
     private ImagePlus getSegmentedImage(ImagePlus originalImage) {
 
-//      roi for LS
+        //roi for LS
         Roi roi = originalImage.getRoi();
 
         // parameters
