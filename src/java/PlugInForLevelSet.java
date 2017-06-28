@@ -165,6 +165,8 @@ public class PlugInForLevelSet implements PlugInFilter {
     private ImagePlus threshold(ImagePlus imagePlus) {
 
         // TODO: Automatically decide the lower limit
+        // TODO: Explore Graph Cut Plugin for this purpose
+        // TODO: Explore other stuffs too
         IJ.setThreshold(imagePlus, lowerThreshold, upperThreshold, "Black & White");
         IJ.run(imagePlus, "Convert to Mask", "");
         return imagePlus;
@@ -201,7 +203,7 @@ public class PlugInForLevelSet implements PlugInFilter {
         //roi for LS
         Roi roi = originalImage.getRoi();
 
-        // parameters
+        // parameters TODo: Automate determiantion of these parameters
         double convergence = 0.0050;
         double advection = 1.0;
         double curvature = 1.0;
