@@ -2,16 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8f22fffa-55c6-4860-98e8-c8404b5a5eb4" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/notebooks/Conv_encoder.ipynb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/notebooks/DataProcess.ipynb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/notebooks/Gabor.ipynb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/notebooks/Motion.ipynb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/notebooks/Validation.ipynb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/python/modified_hausdorf_distance.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/python/thirdparty/chanvese" afterPath="$PROJECT_DIR$/src/python/thirdparty/chanvese" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/python/thirdparty/morphsnakes" afterPath="$PROJECT_DIR$/src/python/thirdparty/morphsnakes" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/notebooks/Thresholding and  Morphological Methods.ipynb" afterPath="$PROJECT_DIR$/src/notebooks/Thresholding and  Morphological Methods.ipynb" />
     </list>
     <ignored path="GSoc.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -734,7 +727,14 @@
       <option name="project" value="LOCAL" />
       <updated>1498669080367</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="Validation using F1 score">
+      <created>1499169747196</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1499169747196</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TodoView" selected-index="3">
