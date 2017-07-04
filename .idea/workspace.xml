@@ -2,13 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8f22fffa-55c6-4860-98e8-c8404b5a5eb4" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/data/Data Annotation/GroundTruth/Test/48.jpg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/data/Data Annotation/Predicted/Test/48.jpg" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/python/thirdparty/chanvese" afterPath="$PROJECT_DIR$/src/python/thirdparty/chanvese" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/python/thirdparty/morphsnakes" afterPath="$PROJECT_DIR$/src/python/thirdparty/morphsnakes" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.md" afterPath="$PROJECT_DIR$/README.md" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/notebooks/Validation.ipynb" afterPath="$PROJECT_DIR$/src/notebooks/Validation.ipynb" />
     </list>
     <ignored path="GSoc.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -52,7 +48,7 @@
           <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
             <state split_layout="SPLIT">
               <first_editor relative-caret-position="119">
-                <caret line="7" column="38" selection-start-line="7" selection-start-column="38" selection-end-line="7" selection-end-column="38" />
+                <caret line="7" column="9" selection-start-line="7" selection-start-column="9" selection-end-line="7" selection-end-column="9" />
                 <folding />
               </first_editor>
               <second_editor />
@@ -771,7 +767,14 @@
       <option name="project" value="LOCAL" />
       <updated>1499174141321</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="Validation notebook update">
+      <created>1499175278960</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1499175278960</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="TodoView" selected-index="3">
@@ -878,7 +881,8 @@
     <MESSAGE value="Validation using F1 score" />
     <MESSAGE value="utility module made for evaluation" />
     <MESSAGE value="Validation class made" />
-    <option name="LAST_COMMIT_MESSAGE" value="Validation class made" />
+    <MESSAGE value="Validation notebook update" />
+    <option name="LAST_COMMIT_MESSAGE" value="Validation notebook update" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
@@ -1190,7 +1194,7 @@
       <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
         <state split_layout="SPLIT">
           <first_editor relative-caret-position="119">
-            <caret line="7" column="38" selection-start-line="7" selection-start-column="38" selection-end-line="7" selection-end-column="38" />
+            <caret line="7" column="9" selection-start-line="7" selection-start-column="9" selection-end-line="7" selection-end-column="9" />
             <folding />
           </first_editor>
           <second_editor />
