@@ -1,20 +1,7 @@
 from .utility import *
 
 
-def f1_get_score(prediction_pixels, truth_pixels, visualize=False, mini=False):
-    truth_pixels_liberal = cv2.erode(truth_pixels, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (10, 10)), iterations=1)
-    truth_pixels_liberal = getBinary(truth_pixels_liberal)
-    prediction_pixels_liberal = cv2.erode(prediction_pixels, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (10, 10)),
-                                          iterations=1)  # img is x. This kernel should be bigger
-    prediction_pixels_liberal = getBinary(prediction_pixels_liberal)
-    # if the kernel is applied to x, then tp stores the number of pixels that y have in that kernal.
-    # #this img is x
-    # we performed dilation in the above case
-
-    if (visualize):
-        plotB(prediction_pixels_liberal, "Dilated predicted pixels")
-        plotB(truth_pixels_liberal, "Dilated ground truth pixels")
-
+class Validation(object):
     """
     matrix that verifies true positive. I
     t contains one where x had a membrance marked and the labelled image had atleast one pixel of membrane within the kernel specified
@@ -25,40 +12,50 @@ def f1_get_score(prediction_pixels, truth_pixels, visualize=False, mini=False):
         y - correctly_classified_pixels
     """
 
-    correctly_classified_pixels_1 = np.bitwise_or(prediction_pixels_liberal, truth_pixels)
-    correctly_classified_pixels_2 = np.bitwise_or(truth_pixels_liberal, prediction_pixels)
-    correctly_classified_pixels_1 = getBinary(correctly_classified_pixels_1)
-    correctly_classified_pixels_2 = getBinary(correctly_classified_pixels_2)
+    def __init__(self):
+        pass
 
-    fn = truth_pixels - correctly_classified_pixels_1  # fn implies the membrane are that haven't been detected
-    fn = getBinary(fn)
+    def fit(self, prediction_pixels, truth_pixels):
+        self.prediction_pixels = prediction_pixels
+        self.truth_pixels = truth_pixels
+        self.truth_pixels_liberal = cv2.erode(truth_pixels, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (10, 10)),
+                                              iterations=1)
+        self.truth_pixels_liberal = getBinary(self.truth_pixels_liberal)
+        self.prediction_pixels_liberal = cv2.erode(prediction_pixels,
+                                                   cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (10, 10)),
+                                                   iterations=1)  # img is x. This kernel should be bigger
+        self.prediction_pixels_liberal = getBinary(self.prediction_pixels_liberal)
 
-    fp = correctly_classified_pixels_2 - prediction_pixels  # fn imples the pixels that  falsly detected membrane area
-    fp = getBinary(fp)
+        correctly_classified_pixels_1 = np.bitwise_or(self.prediction_pixels_liberal, truth_pixels)
+        correctly_classified_pixels_2 = np.bitwise_or(self.truth_pixels_liberal, prediction_pixels)
+        correctly_classified_pixels_1 = getBinary(correctly_classified_pixels_1)
+        self.ccorrectly_classified_pixels_2 = correctly_classified_pixels_2 = getBinary(correctly_classified_pixels_2)
 
-    if (visualize):
-        plotB(correctly_classified_pixels_1, "Correctly classified")
-        plotB(fn, "The membrane that wasn't detected")
-        plotB(fp, "The extra membrance detected ")
-    if (mini):
-        plotB(fn, "The membrane that wasn't detected")
-        plotB(fp, "The extra membrance detected ")
+        fn = truth_pixels - correctly_classified_pixels_1  # fn implies the membrane are that haven't been detected
+        self.fn_img = fn = getBinary(fn)
 
-    fp_pixel_count = np.count_nonzero(fp)
-    fn_pixel_count = np.count_nonzero(fn)
-    tp_pixel_count = int(
-        (np.count_nonzero(correctly_classified_pixels_1) + np.count_nonzero(correctly_classified_pixels_2)) / 2)
+        fp = correctly_classified_pixels_2 - prediction_pixels  # fn imples the pixels that  falsly detected membrane area
+        self.fp_img = fp = getBinary(fp)
 
-    precision = float(tp_pixel_count) / float(tp_pixel_count + fp_pixel_count)
-    recall = float(tp_pixel_count) / float(tp_pixel_count + fn_pixel_count)
+        self.fp = np.count_nonzero(fp)
+        self.fn = np.count_nonzero(fn)
+        self.tp = int(
+            (np.count_nonzero(correctly_classified_pixels_1) + np.count_nonzero(correctly_classified_pixels_2)) / 2)
 
-    f1_score = (2 * precision * recall) / (precision + recall)
-    return f1_score
+    def get_precision(self):
+        return float(self.tp) / float(self.tp + self.fp)
 
+    def get_recall(self):
+        return float(self.tp) / float(self.tp + self.fn)
 
-def get_precision(tp, fp):
-    return float(tp) / float(tp + fp)
+    def get_f_score(self, alpha=0.5):
+        return 1.0 / (
+            (alpha / self.get_precision()) + ((1 - alpha) / self.get_recall()))
 
-
-def get_recall(tp, fn):
-    return float(tp) / float(tp + fn)
+    def plot(self, big=False):
+        plotB(self.fn_img, "Membrane that wasn't detected")
+        plotB(self.fp_img, "This membrane doesn't exists")
+        if (big):
+            plotB(self.ccorrectly_classified_pixels_2, "Correctly classified pixels")
+            plotB(self.prediction_pixels, "Prediction pixels")
+            plotB(self.truth_pixels, "Truth Pixels")
