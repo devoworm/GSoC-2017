@@ -78,7 +78,7 @@ def folderToImages(folderpath):
     :return: returns a list binary image (@getBinary) present in folder path
     """
     images = []
-    for file in glob.glob(folderpath + "*"):
+    for file in glob.glob(folderpath + "*.jpg"):
         ret, thresh = cv2.threshold(cv2.imread(file, 0), 127, 255, cv2.THRESH_BINARY)
         getBinary(thresh)
         images.append(thresh)
