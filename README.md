@@ -23,10 +23,9 @@ A list of broad techniques we tried:
 ### About this repo:
 This repo basically reflects the research phase of this project. It is not collectively exhaustive and it gives details of a few approaches that were tried during this phase.
 
-A major portion of the code in src/notebooks and src/python.  Validation is still under development. There are some nice examples of Active Contours and Level Sets methods(and several methods that are similars) being used for our purpose. Thresholding and Morphological also gave some nice results.
+A major portion of the code is in src/notebooks and src/python. Validation is still under development. There are some nice examples of Active Contours and Level Sets methods(and methods that are similar to them) being used for our purpose. Thresholding and Morphological approaches also gave some nice results.
 
 Data used during the research process is in src/data. 
-
 You can find some annotated data(labeled data) in form of raw binary images(src/data/Data Annotation) and .arff weka data files(in src/data/Labeled Data/Weka_TWS_Data).
 There are also a few Weka classifiers in form of .model files. (in src/data/classifiers)
 
