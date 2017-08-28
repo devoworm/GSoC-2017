@@ -7,7 +7,7 @@ Mentor: [Bradly Alicea][1]
 
 Organisation: [DevoWorm][4], [OpenWorm][5], [INCF][3] 
 
-###About this project:
+### About this project:
 The aim of this project is to find out a method to segment all the cells that are present in an embryo of c.elegans. We will use the result of this segmentation to collect data about static location after division and vectors that describe shape changes and overall positional changes in the embryo. We have used SPIM microscopy images as out data for this research.
 
 A list of broad techniques we tried:
@@ -20,7 +20,7 @@ A list of broad techniques we tried:
 - Level Sets algorithms
 
 
-###About this repo:
+### About this repo:
 This repo basically reflects the research phase of this project. It is not collectively exhaustive and it gives details of a few approaches that were tried during this phase.
 
 A major portion of the code in src/notebooks and src/python.  Validation is still under development. There are some nice examples of Active Contours and Level Sets methods(and several methods that are similars) being used for our purpose. Thresholding and Morphological also gave some nice results.
